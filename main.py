@@ -3,7 +3,7 @@
 
 import webapp2
 import os
-from google.appengine.ext.webapp import template
+from google.appengine.ext.webapp import
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
