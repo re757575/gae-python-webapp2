@@ -13,7 +13,7 @@
     <p>File Name : {{ filename }}</p>
     <p>File Blob Key : {{ filekey }}</p>
     <p>File Type : {{ filetype }}</p>
-    <p>File Size : {{ filesize }}</p>
+    <p>File Size : {{ filesize|filesizeformat }}</p>
 
     <!-- 利用 Blobstore key 取得檔案 -->
     {% if filetype == 'video/mp4' %}

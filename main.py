@@ -68,7 +68,7 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             # 取得已上傳檔案的 BlobInfo 物件
             file = self.get_uploads()[0]
             # 將已上傳檔案的資訊紀錄一起導回 uploadfile.html，
-            query = "filename=" + urllib.quote(file.filename) + "&filekey="+str(file.key()) + "&filetype="+ file.content_type + "&filesize="+ str(file.size/1024/1024) +"MB"
+            query = "filename=" + urllib.quote(file.filename) + "&filekey="+str(file.key()) + "&filetype="+ file.content_type + "&filesize="+ str(file.size)
             self.redirect("/uploadfile?" + query)
 
 class ServeFileHandler(blobstore_handlers.BlobstoreDownloadHandler):
