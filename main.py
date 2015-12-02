@@ -7,6 +7,7 @@ import urllib
 from google.appengine.ext.webapp import template
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
+import model
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -69,6 +70,9 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             file = self.get_uploads()[0]
             # 將已上傳檔案的資訊紀錄一起導回 uploadfile.html，
             query = "filename=" + urllib.quote(file.filename) + "&filekey="+str(file.key()) + "&filetype="+ file.content_type + "&filesize="+ str(file.size)
+
+            book = model.InsertBook(file.filename, 'Alex_'+ str(file.key()))
+
             self.redirect("/uploadfile?" + query)
 
 class ServeFileHandler(blobstore_handlers.BlobstoreDownloadHandler):
