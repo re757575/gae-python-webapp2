@@ -20,6 +20,17 @@ class MainHandler(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
+    def post(self):
+
+        name = self.request.POST['name']
+
+        template_values = {
+            'name': name
+        }
+
+        path = os.path.join(os.path.dirname(__file__), 'index.html')
+        self.response.out.write(template.render(path, template_values))
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
 ], debug=True)
