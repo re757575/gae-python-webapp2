@@ -7,12 +7,14 @@
 </form>
 
 <!-- 以下部分為檔案上傳完後，導回此頁並顯示檔案相關資訊 -->
-<p>File Name : {{ filename }}</p>
-<p>File Blob Key : {{ filekey }}</p>
-<p>File Type : {{ filetype }}</p>
-<p>File Size : {{ filesize }}</p>
 
 {% if filekey != None %}
+
+    <p>File Name : {{ filename }}</p>
+    <p>File Blob Key : {{ filekey }}</p>
+    <p>File Type : {{ filetype }}</p>
+    <p>File Size : {{ filesize }}</p>
+
     <!-- 利用 Blobstore key 取得檔案 -->
     {% if filetype == 'video/mp4' %}
         <video width="640" height="480" controls loop poster="">
@@ -21,4 +23,18 @@
     {% else %}
         <img width="640" height="480" src="/servefile/{{ filekey }}" />
     {% endif %}
+{% endif %}
+
+{% if files|length > 0 %}
+
+    <h3>File List:</h3>
+    filename / filekey / filesize:
+    <br/>
+    {% for fs in files %}
+        {{ fs.filename }} / <a target="_blank" href="/servefile/{{ fs.key }}">檔案連結</a> / {{ fs.size|filesizeformat }}
+        <br/>
+    {% empty %}
+        no file...
+    {% endfor %}
+
 {% endif %}

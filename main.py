@@ -36,13 +36,17 @@ class PostHandler(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
-class UploadFilePage(webapp2.RequestHandler):
+class UploadFilePage(webapp2.RequestHandler, blobstore.BlobInfo):
     def get(self):
+
+        # 取得已上傳的檔案
+        files = self.all();
+
         # 建立一個 Blobstore 的上傳路徑
         upload_url = blobstore.create_upload_url('/upload')
 
         # 將 Blobstore 上傳路徑傳至頁面表單的 action 屬性
-        values = {"upload_url": upload_url}
+        values = {"upload_url": upload_url, "files": files}
 
         # 上傳完成後會導回此頁，並將相關參數傳入，利用參數顯示檔案名稱、預覽檔案
         if len(self.request.query) > 0:
@@ -58,13 +62,14 @@ class UploadFilePage(webapp2.RequestHandler):
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
 
-        # 取得已上傳檔案的 BlobInfo 物件
-        file = self.get_uploads()[0]
-
-        # 將已上傳檔案的資訊紀錄一起導回 uploadfile.html，
-        query = "filename=" + urllib.quote(file.filename) + "&filekey="+str(file.key()) + "&filetype="+ file.content_type + "&filesize="+ str(file.size/1024/1024) +"MB"
-
-        self.redirect("/uploadfile?" + query)
+        if len(self.get_uploads()) == 0:
+            self.response.write('No file to upload')
+        else:
+            # 取得已上傳檔案的 BlobInfo 物件
+            file = self.get_uploads()[0]
+            # 將已上傳檔案的資訊紀錄一起導回 uploadfile.html，
+            query = "filename=" + urllib.quote(file.filename) + "&filekey="+str(file.key()) + "&filetype="+ file.content_type + "&filesize="+ str(file.size/1024/1024) +"MB"
+            self.redirect("/uploadfile?" + query)
 
 class ServeFileHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self, filekey):
