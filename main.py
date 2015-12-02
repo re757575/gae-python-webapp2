@@ -9,19 +9,7 @@ class MainHandler(webapp2.RequestHandler):
     def get(self):
 
         # 取得參數 name 的值
-        name = self.request.get("name")
-
-        # 取得所有參數
-        self.request.GET
-
-        # 取得參數 name 的值，若有兩個 name 參數則顯示最後一個
-        self.request.GET['name']
-
-        # 取得所有名為 name 參數值
-        self.request.GET.getall('name')
-
-        # 取得所有參數
-        self.request.GET.items()
+        name = self.request.get("name", "World")
 
         # 這邊設定要傳入頁面的參數 name，值為 Seth
         template_values = {
