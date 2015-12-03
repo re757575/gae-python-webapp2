@@ -4,10 +4,14 @@
 import webapp2
 import os
 import urllib
+import json
+
 from google.appengine.ext.webapp import template
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
+
 import model
+
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -37,11 +41,11 @@ class PostHandler(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
-class UploadFilePage(webapp2.RequestHandler, blobstore.BlobInfo):
+class UploadFilePage(webapp2.RequestHandler):
     def get(self):
 
         # 取得已上傳的檔案
-        files = self.all();
+        files = blobstore.BlobInfo.all();
 
         # 建立一個 Blobstore 的上傳路徑
         upload_url = blobstore.create_upload_url('/upload')
@@ -83,10 +87,31 @@ class ServeFileHandler(blobstore_handlers.BlobstoreDownloadHandler):
         else:
             self.send_blob(filekey)
 
+class deleteFileHandler(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+
+        result = {
+            "status": 0,
+            "msg": None
+        }
+
+        blobKey = self.request.get("blobKey", "")
+
+        if blobKey != "":
+            blobstore.delete(blobKey)
+            result['status'] = 1
+        else:
+            result['status'] = 0
+            result['msg'] = 'blobKey is null'
+
+        self.response.out.write(json.dumps(result))
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/post', PostHandler),
     ('/upload', UploadHandler),
     ('/uploadfile', UploadFilePage),
-    ('/servefile/([^/]+)?', ServeFileHandler)
+    ('/servefile/([^/]+)?', ServeFileHandler),
+    ('/deletefile', deleteFileHandler),
 ], debug=True)

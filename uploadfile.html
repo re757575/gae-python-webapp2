@@ -39,9 +39,11 @@
     <br/>
     {# 我是註解 #}
     {% for fs in files %}
-        <div class="item" style="padding: 10px 0px 10px;">
-            {{ fs.filename }} / <a target="_blank" class="fileLink" href="/servefile/{{ fs.key }}">檔案連結</a> / {{ fs.size|filesizeformat }}
-            <a href="javascript:;" class="viewFile" id="{{ fs.key }}" data-file-name="{{ fs.filename }}" data-file-type="{{ fs.content_type }}">點選檢視檔案</a>
+        <div class="item" style="padding: 10px 0px 10px;" data-file-name="{{ fs.filename }}"
+             data-file-type="{{ fs.content_type }}" data-file-key="{{ fs.key }}">
+            <a href="javascript:;" class="deletefile" style="color: red;">刪除</a>
+            {{ fs.filename }} / <a target="_blank" class="fileLink">檔案連結</a> / {{ fs.size|filesizeformat }}
+            <a href="javascript:;" class="viewFile">點選檢視檔案</a>
             <div class="divFile" style=""></div>
         </div>
     {% empty %}
@@ -54,11 +56,13 @@
 
     $('a[class="viewFile"]').click(function() {
         var _this = $(this);
-        var $divFile = _this.siblings('div[class="divFile"]'),
-            fileName = _this.data('fileName'),
-            fileType = _this.data('fileType'),
-            fileLink = _this.siblings('a[class="fileLink"]').attr('href');
+        var $fileInfo = _this.parent('.item'),
+            fileName = $fileInfo.data('fileName'),
+            fileType = $fileInfo.data('fileType'),
+            fileKey = $fileInfo.data('fileKey'),
+            fileLink = '/servefile/'+fileKey;
 
+        var $divFile = _this.siblings('div[class="divFile"]');
         $divFile.css({ 'width': '420px', 'height': '340px' });
 
         switch (fileType.split('/')[0]) {
@@ -80,6 +84,42 @@
             default:
         }
         _this.hide();
+    });
+
+    $('.deletefile').click(function() {
+        var _this = $(this);
+        var $fileInfo = _this.parent('.item'),
+            fileName = $fileInfo.data('fileName'),
+            filekey = $fileInfo.data('fileKey');
+
+        var $divFile = _this.siblings('div[class="divFile"]');
+
+        var conf = confirm("Delete file "+ fileName + " ?");
+        if (conf == true) {
+            $.ajax({
+                url: '/deletefile',
+                method: 'GET',
+                data: {'blobKey': filekey},
+                dataType: 'json',
+                beforeSend: function() {
+                    _this.hide();
+                },
+                error: function(error) {
+                    alert(error.status +': '+error.statusText);
+                    _this.show();
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.status == 1) {
+                        _this.parent('.item').fadeOut(500, function() {
+                            _this.parent('.item').remove();
+                        });
+                    } else {
+                        alert(response.msg);
+                    }
+                }
+            });
+        }
     });
 
     $('#viewAllFile').click(function() {
