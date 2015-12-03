@@ -1,3 +1,10 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<style>
+    body {
+        background: #e6e6e6 url('http://cdn-theme.logdown.io/its-compiling/images/furley-bg.png?1399876373');
+    }
+</style>
+
 <!-- 上傳檔案頁面：uploadfile.html -->
 <p><a href="/">back</a></p>
 <!-- 以下部分為基本上傳檔案的表單寫法 -->
@@ -28,13 +35,54 @@
 {% if files|length > 0 %}
 
     <h3>File List:</h3>
-    filename / filekey / filesize:
+    filename / filekey / filesize: <a href="javascript:;" id="viewAllFile">檢視全部檔案</a>
     <br/>
+    {# 我是註解 #}
     {% for fs in files %}
-        {{ fs.filename }} / <a target="_blank" href="/servefile/{{ fs.key }}">檔案連結</a> / {{ fs.size|filesizeformat }}
-        <br/>
+        <div class="item" style="padding: 10px 0px 10px;">
+            {{ fs.filename }} / <a target="_blank" class="fileLink" href="/servefile/{{ fs.key }}">檔案連結</a> / {{ fs.size|filesizeformat }}
+            <a href="javascript:;" class="viewFile" id="{{ fs.key }}" data-file-name="{{ fs.filename }}" data-file-type="{{ fs.content_type }}">點選檢視檔案</a>
+            <div class="divFile" style=""></div>
+        </div>
     {% empty %}
         no file...
     {% endfor %}
 
 {% endif %}
+
+<script>
+
+    $('a[class="viewFile"]').click(function() {
+        var _this = $(this);
+        var $divFile = _this.siblings('div[class="divFile"]'),
+            fileName = _this.data('fileName'),
+            fileType = _this.data('fileType'),
+            fileLink = _this.siblings('a[class="fileLink"]').attr('href');
+
+        $divFile.css({ 'width': '420px', 'height': '340px' });
+
+        switch (fileType.split('/')[0]) {
+            case 'image':
+                $divFile.html('<img src="'+ fileLink +'" style="height: 100%; width: 100%;">')
+                break;
+            case 'video':
+                var video = $('<video src="'+ fileLink +'" style="height: 100%; width: 100%;" controls loop></video>')[0];
+                var canPlay = video.canPlayType(fileType);
+                var isError = (canPlay === 'no' || canPlay === '');
+                if (!isError) {
+                    $divFile.html('<video src="'+ fileLink +'" style="height: 100%; width: 100%;" controls loop></video>')
+                } else {
+                    $divFile.removeAttr('style');
+                    var erorMsg = "Can't play "+ fileName +", file type is "+ fileType;
+                    $divFile.html('<div style="background-color: red; color: white;">'+ erorMsg +'</div>');
+                }
+                break;
+            default:
+        }
+        _this.hide();
+    });
+
+    $('#viewAllFile').click(function() {
+        $('a[class="viewFile"]').click();
+    });
+</script>
