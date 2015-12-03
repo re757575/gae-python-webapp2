@@ -5,6 +5,7 @@ import webapp2
 import os
 import urllib
 import json
+import logging
 
 from google.appengine.ext.webapp import template
 from google.appengine.ext import blobstore
@@ -12,6 +13,14 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 import model
 
+def handle_404(request, response, exception):
+    # 將 Exception 訊息顯示出來, import logging
+    logging.exception(exception)
+
+    # 指定一個頁面輸出
+    path = os.path.join(os.path.dirname(__file__), '404.html')
+    response.out.write(template.render(path, {}))
+    response.set_status(404)
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -115,3 +124,5 @@ app = webapp2.WSGIApplication([
     ('/servefile/([^/]+)?', ServeFileHandler),
     ('/deletefile', deleteFileHandler),
 ], debug=True)
+
+app.error_handlers[404] = handle_404
